@@ -16,6 +16,7 @@ import numpy as np
 import os
 import shutil
 import time
+import cameramove
 
 # 全局参数
 audio_dir = '../audios'
@@ -130,6 +131,13 @@ for action in action_list:
         for (left, top, right, bottom) in face_location_list:
             cv2.rectangle(img_OpenCV, (left, top), 
                           (right, bottom), (0, 0, 255), 2)
+        
+        if face_location_list:
+            #print(face_location_list)
+            sp = img_OpenCV.shape
+            img_OpenCV = cameramove.cameramove(img_OpenCV,sp[1],sp[0],
+                        face_location_list[0][1],face_location_list[0][3],
+                        face_location_list[0][0],face_location_list[0][2])
 
 
         face_count = len(face_location_list)
