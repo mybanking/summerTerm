@@ -14,7 +14,15 @@ python startingcameraservice.py --location room
 import argparse
 from flask import Flask, render_template, Response, request
 from oldcare.camera import VideoCamera
-
+import os
+import threading
+from keras.models import load_model
+import time
+from collectingfaces import Collectingfaces
+from checkingfalldetection import Checkingfalldetection
+from checkingfence import Checkingfence
+from checkingstrangersandfacialexpression import Checkingstrangersandfacialexpression
+from checkingvolunteeractivity import Checkingvolunteeractivity
 # 传入参数
 ap = argparse.ArgumentParser()
 ap.add_argument("-f", "--location", required=False,
@@ -41,8 +49,18 @@ def index():
 def record_status():
     global video_camera
     if video_camera == None:
-        video_camera = VideoCamera()
-
+        # video_camera=Collectingfaces("../images","104")
+        # video_camera.startCollect()
+        # video_camera=Checkingfalldetection("../images/tests/videos/3.mp4")
+        # video_camera.startfall()
+        video_camera=Checkingfence("../images/tests/videos/yard_01.mp4")
+        video_camera.startfence()
+        # video_camera=Checkingstrangersandfacialexpression("../images/tests/videos//room_01.mp4")
+        # video_camera=Checkingstrangersandfacialexpression()
+        # video_camera.startstrangerFacial()
+        # video_camera=Checkingvolunteeractivity("../images/tests/videos/desk_01.mp4")
+        # video_camera.startactivity()
+        
     status = request.form.get('status')
     save_video_path = request.form.get('save_video_path')
 
@@ -59,17 +77,31 @@ def video_stream():
     global global_frame
 
     if video_camera is None:
-        video_camera = VideoCamera()
+        
+        # video_camera=Collectingfaces("../images","104")
+        # video_camera.startCollect()
+
+        # video_camera=Checkingfalldetection("../images/tests/videos/3.mp4")
+        # video_camera.startfall()
+        video_camera=Checkingfence("../images/tests/videos/yard_01.mp4")
+        video_camera.startfence()
+        # video_camera=Checkingstrangersandfacialexpression("../images/tests/videos//room_01.mp4")
+        # video_camera=Checkingstrangersandfacialexpression("")
+        # video_camera.startstrangerFacial()
+        # video_camera=Checkingvolunteeractivity("../images/tests/videos/desk_01.mp4")
+        # video_camera.startactivity()
 
     while True:
+        
         frame = video_camera.get_frame()
-
         if frame is not None:
-            global_frame = frame
-            yield (b'--frame\r\n'
-                   b'Content-Type: image/jpeg\r\n\r\n' + frame
-                   + b'\r\n\r\n')
-        else:
+            if frame!=global_frame:
+                global_frame = frame
+                # print("上传一帧")
+                yield (b'--frame\r\n'
+                    b'Content-Type: image/jpeg\r\n\r\n' + frame
+                    + b'\r\n\r\n')
+        elif global_frame!=None:
             yield (b'--frame\r\n'
                    b'Content-Type: image/jpeg\r\n\r\n'
                    + global_frame + b'\r\n\r\n')
@@ -82,3 +114,4 @@ def video_viewer():
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', threaded=True, port=5001)
+
