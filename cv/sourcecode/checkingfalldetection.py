@@ -37,7 +37,8 @@ fall_limit_time = 1 # if >= 1 seconds, then he/she falls.
 model_path = '../models/fall_detection.hdf5'
 output_fall_path = '../supervision/fall'
  # your python path
-python_path = '/home/kdy/anaconda3/envs/tensorflow/bin/python'
+python_path = '/home/jm/anaconda3/envs/tensorflow/bin/python'
+#python_path = '/home/kdy/anaconda3/envs/tensorflow/bin/python'
 
 # 全局常量
 TARGET_WIDTH = 64
@@ -84,6 +85,14 @@ model = load_model(model_path)
 t = threading.Thread(target=run) 
 t.start()
 print('[INFO] 开始检测是否有人摔倒...')
+
+#speed
+speeda = 0
+acceleration = -1
+the_buttocks_x = 0
+the_buttocks_y = 0
+the_time = time.time()
+
 # 不断循环
 counter = 0
 while True:
@@ -107,6 +116,7 @@ while True:
     roi = np.expand_dims(roi, axis=0)
 
     img = cv2.imencode(".jpg", image)[1].tobytes()
+    
     
     # # cv2.imwrite(os.path.join("./supervision","temp.jpg"),image) 
     if a.get("skeletons"):
@@ -173,17 +183,59 @@ while True:
                 mid_foot_y=int(right_foot.get('y'))+int(left_foot.get('y'))
                 mid_foot_y=mid_foot_y/2
 
-                # if width>height:
-                #     index=1
-                #     break
-                # print('zzz')
-                print(calc_angle(mid_buttocks_x,mid_buttocks_y,int(head.get('x')),int(head.get('y'))))
-                print(calc_angle(mid_foot_x,mid_foot_y,mid_buttocks_x,mid_buttocks_y))
+                right_knee=landmark.get("right_knee")
+                left_knee=landmark.get("left_knee")
+                mid_knee_x=int(right_knee.get('x'))+int(left_knee.get('x'))
+                mid_knee_x=mid_knee_x/2
+                mid_knee_y=int(right_knee.get('y'))+int(left_knee.get('y'))
+                mid_knee_y=mid_knee_y/2
+
+                #check speed
+                if counter%10==0:
+                    if the_buttocks_x==0 and the_buttocks_y==0:
+                        the_buttocks_x = mid_buttocks_x
+                        the_buttocks_y = mid_buttocks_y
+                    else:
+                        dtime = time.time()-the_time
+                        the_time = time.time()
+                        sq1 = (mid_buttocks_x-the_buttocks_x)*(mid_buttocks_x-the_buttocks_x)
+                        sq2 = (mid_buttocks_y-the_buttocks_y)*(mid_buttocks_y-the_buttocks_y)
+                        dis = math.sqrt(sq1 + sq2)
+                        speedb = dis/dtime
+                        if acceleration != -1:
+                            if acceleration != 0 and abs((speeda-speedb)/dtime)>7*acceleration:
+                                print("加速度变化较大，存在摔倒风险")
+                            acceleration = abs((speeda-speedb)/dtime)
+                            speeda = speedb
+                            #print(acceleration)
+                        else:
+                            speeda = speedb
+                            acceleration = abs((speeda-speedb)/dtime)
+                            #print(-1)
+                        the_buttocks_x = mid_buttocks_x
+                        the_buttocks_y = mid_buttocks_y
+
+                #tocheck torso line
+                check = 0
+                #print(calc_angle(mid_buttocks_x,mid_buttocks_y,int(head.get('x')),int(head.get('y'))))
+                #print(calc_angle(mid_foot_x,mid_foot_y,mid_buttocks_x,mid_buttocks_y))
                 if abs(calc_angle(mid_buttocks_x,mid_buttocks_y,int(head.get('x')),int(head.get('y'))))<60 and abs(calc_angle(mid_foot_x,mid_foot_y,mid_buttocks_x,mid_buttocks_y))<60:
-                    index=1
-                    break
+                    print("check method1:")
+                    print("Upper body torso line:"+str(calc_angle(mid_buttocks_x,mid_buttocks_y,int(head.get('x')),int(head.get('y')))))
+                    print("Lower body torso line:"+str(calc_angle(mid_foot_x,mid_foot_y,mid_buttocks_x,mid_buttocks_y)))
+                    check=1
+                    #break
+                if abs(calc_angle(mid_knee_x,mid_knee_y,int(head.get('x')),int(head.get('y')))) < 70 and abs(calc_angle(mid_foot_x,mid_foot_y,mid_knee_x,mid_knee_y))<45:
+                    print("check method2:")
+                    print("all torso line:"+str(calc_angle(mid_buttocks_x,mid_buttocks_y,int(head.get('x')),int(head.get('y')))))
+                    print("Calf line:"+str(calc_angle(mid_foot_x,mid_foot_y,mid_buttocks_x,mid_buttocks_y)))
+                    check=1
+                    #break
+                
+                if check == 0:
+                    index = 0
                 else:
-                    index=0
+                    index = 1
 
 
         if index==1:
@@ -239,7 +291,7 @@ while True:
         break
 
 
-
+time.sleep(5)
 vs.release()
 cv2.destroyAllWindows()
 
