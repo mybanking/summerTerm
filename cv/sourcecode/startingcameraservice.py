@@ -23,6 +23,7 @@ from checkingfalldetection import Checkingfalldetection
 from checkingfence import Checkingfence
 from checkingstrangersandfacialexpression import Checkingstrangersandfacialexpression
 from checkingvolunteeractivity import Checkingvolunteeractivity
+from startingrecording import Startingrecording
 # 传入参数
 ap = argparse.ArgumentParser()
 ap.add_argument("-f", "--location", required=False,
@@ -49,13 +50,16 @@ def index():
 def record_status():
     global video_camera
     if video_camera == None:
+        video_camera=VideoCamera()
+        s=Startingrecording(location)
+        s.startStartrecord()
         # video_camera=Collectingfaces("../images","104")
         # video_camera.startCollect()
         # video_camera=Checkingfalldetection("../images/tests/videos/3.mp4")
         # video_camera.startfall()
-        video_camera=Checkingfence("../images/tests/videos/yard_01.mp4")
-        video_camera.startfence()
-        # video_camera=Checkingstrangersandfacialexpression("../images/tests/videos//room_01.mp4")
+        # video_camera=Checkingfence("../images/tests/videos/yard_01.mp4")
+        # video_camera.startfence()
+        # video_camera=Checkingstrangersandfacialexpression("")
         # video_camera=Checkingstrangersandfacialexpression()
         # video_camera.startstrangerFacial()
         # video_camera=Checkingvolunteeractivity("../images/tests/videos/desk_01.mp4")
@@ -77,14 +81,16 @@ def video_stream():
     global global_frame
 
     if video_camera is None:
-        
+        video_camera=VideoCamera()
+        s=Startingrecording("room")
+        s.startStartrecord()
         # video_camera=Collectingfaces("../images","104")
         # video_camera.startCollect()
 
         # video_camera=Checkingfalldetection("../images/tests/videos/3.mp4")
         # video_camera.startfall()
-        video_camera=Checkingfence("../images/tests/videos/yard_01.mp4")
-        video_camera.startfence()
+        # video_camera=Checkingfence("../images/tests/videos/yard_01.mp4")
+        # video_camera.startfence()
         # video_camera=Checkingstrangersandfacialexpression("../images/tests/videos//room_01.mp4")
         # video_camera=Checkingstrangersandfacialexpression("")
         # video_camera.startstrangerFacial()

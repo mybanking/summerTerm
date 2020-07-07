@@ -270,7 +270,8 @@ class Checkingstrangersandfacialexpression():
                     # (同时处理中文显示问题)
                 img_PIL = Image.fromarray(cv2.cvtColor(frame,
                                                     cv2.COLOR_BGR2RGB))
-
+                cv2.circle(frame, (int((left+right)/2), int((top+bottom)/2)), 4, 
+						(0, 255, 0), -1)
                 draw = ImageDraw.Draw(img_PIL)
                 final_label = id_card_to_name[name] + ': ' + facial_expression_id_to_name[
                     facial_expression_label] if facial_expression_label else id_card_to_name[name]
