@@ -16,7 +16,7 @@ import numpy as np
 import os
 import shutil
 import time
-<<<<<<< HEAD
+import cameramove
 import threading
 from oldcare.api import SmileApi
 
@@ -79,9 +79,6 @@ class Collectingfaces():
                     'smile':'请笑一笑', 'rise_head':'请抬头', 
                     'bow_head':'请低头', 'look_left':'请看左边', 
                     'look_right':'请看右边'}
-=======
-import cameramove
->>>>>>> b5d70f97b7caf5e580fae813ec7f8b4fb82a0d21
 
 
     
@@ -96,7 +93,6 @@ import cameramove
                 continue
             image = cv2.flip(image, 1)
             
-<<<<<<< HEAD
             if error == 1:
                 end_time = time.time()
                 difference = end_time - start_time
@@ -108,89 +104,6 @@ import cameramove
             for (left, top, right, bottom) in face_location_list:
                 cv2.rectangle(image, (left, top), (right, bottom), 
                             (0, 0, 255), 2)
-=======
-    face_location_list = faceutil.get_face_location(image)
-    for (left, top, right, bottom) in face_location_list:
-        cv2.rectangle(image, (left, top), (right, bottom), 
-                      (0, 0, 255), 2)
-        
-    cv2.imshow('Collecting Faces', image) # show the image
-    # Press 'ESC' for exiting video
-    k = cv2.waitKey(100) & 0xff 
-    if k == 27:
-        break
-    
-    face_count = len(face_location_list)
-    if error == 0 and face_count == 0: # 没有检测到人脸
-        print('[WARNING] 没有检测到人脸')
-        audioplayer.play_audio(os.path.join(audio_dir,
-                                            'no_face_detected.mp3'))
-        error = 1
-        start_time = time.time()
-    elif error == 0 and face_count == 1: # 可以开始采集图像了
-        print('[INFO] 可以开始采集图像了')
-        audioplayer.play_audio(os.path.join(audio_dir,
-                               'start_image_capturing.mp3'))
-        time.sleep(3)
-        break
-    elif error == 0 and face_count > 1: # 检测到多张人脸
-        print('[WARNING] 检测到多张人脸')
-        audioplayer.play_audio(os.path.join(audio_dir,
-                               'multi_faces_detected.mp3'))
-        error = 1
-        start_time = time.time()
-    else:
-        pass
-
-# 新建目录
-if os.path.exists(os.path.join(args['imagedir'],args['id'])):
-    shutil.rmtree(os.path.join(args['imagedir'],args['id']),True)
-os.mkdir(os.path.join(args['imagedir'],args['id']))
-
-type=1
-# 开始采集人脸
-error=0
-for action in action_list:
-    audioplayer.play_audio(os.path.join(audio_dir,action+'.mp3'))
-    time.sleep(3)
-    action_name = action_map[action]
-    counter = 1
-    for i in range(15):
-
-        if error == 1:
-            end_time = time.time()
-            difference = end_time - start_time
-            print(difference)
-            if  difference >= 3:
-                 
-                 error=0
-                 type=0
-                 break
-
-        print('%s-%d' %(action_name, i))
-        _, img_OpenCV =cam.read()
-        img_OpenCV = cv2.flip(img_OpenCV, 1)
-        origin_img = img_OpenCV.copy() # 保存时使用
-        
-        face_location_list = faceutil.get_face_location(img_OpenCV)
-        for (left, top, right, bottom) in face_location_list:
-            cv2.rectangle(img_OpenCV, (left, top), 
-                          (right, bottom), (0, 0, 255), 2)
-        
-        if face_location_list:
-            #print(face_location_list)
-            sp = img_OpenCV.shape
-            img_OpenCV = cameramove.cameramove(img_OpenCV,sp[1],sp[0],
-                        face_location_list[0][1],face_location_list[0][3],
-                        face_location_list[0][0],face_location_list[0][2])
-
-
-        face_count = len(face_location_list)
-        print(face_count)
-        if error==0 and face_count==0:#中途退出，采集失败
-            start_time = time.time()
-            error = 1
->>>>>>> b5d70f97b7caf5e580fae813ec7f8b4fb82a0d21
             
             f=image 
             cv2.imshow('Collecting Faces', image) # show the image
@@ -255,6 +168,13 @@ for action in action_list:
                 for (left, top, right, bottom) in face_location_list:
                     cv2.rectangle(img_OpenCV, (left, top), 
                                 (right, bottom), (0, 0, 255), 2)
+                
+                if face_location_list:
+                    #print(face_location_list)
+                    sp = img_OpenCV.shape
+                    img_OpenCV = cameramove.cameramove(img_OpenCV,sp[1],sp[0],
+                            face_location_list[0][1],face_location_list[0][3],
+                            face_location_list[0][0],face_location_list[0][2])
 
 
                 face_count = len(face_location_list)
