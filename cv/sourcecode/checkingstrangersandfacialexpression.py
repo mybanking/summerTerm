@@ -216,11 +216,11 @@ class Checkingstrangersandfacialexpression():
                  
                     img = cv2.imencode(".jpg", img)[1].tobytes()
                     biaoqing = SmileApi()
-                    a = biaoqing.detect_smile(img)
+                    result= biaoqing.detect_smile(img)
                     # cv2.imwrite(os.path.join(output_smile_path,"temp.jpg"),frame)
                     # biaoqing = SmileApi()
                     # a = biaoqing.detect_smile(output_smile_path+"/temp.jpg")
-                    b=a.get("faces")[0].get("attributes").get("emotion")
+                    b=result.get("faces")[0].get("attributes").get("emotion")
                     # max函数：max(iterable) -> value 返回容器类型里最大的值
                     max_value = max(b.values())
                     # print(max_value)

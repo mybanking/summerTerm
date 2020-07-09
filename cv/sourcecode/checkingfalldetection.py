@@ -23,7 +23,7 @@ import imutils
 
 
 img=''
-a=''
+result=''
 f=""
 
 
@@ -38,10 +38,10 @@ class Checkingfalldetection():
           
             biaoqing = SmileApi()
             while True:
-                global a
+                global result
                 global img
                 if img!='':
-                    a = biaoqing.detect_fall(img)
+                    result= biaoqing.detect_fall(img)
 
     #连接骨架函数
     def connect_skeleton(self,image,skeleton1,skeleton2,left,top,color):
@@ -60,7 +60,7 @@ class Checkingfalldetection():
         return angle
 
     def run(self):
-        global a
+        global result
         global img
 
         # threadmax = threading.BoundedSemaphore(20)
@@ -96,7 +96,7 @@ class Checkingfalldetection():
             print("开始骨骼检测")
             # vs = cv2.VideoCapture(0)
         #
-        a={"skeletons":[]}
+        result={"skeletons":[]}
         #开启线程
         t1 = threading.Thread(target=self.run1) 
         t1.start()
@@ -127,10 +127,10 @@ class Checkingfalldetection():
             img = cv2.imencode(".jpg", image)[1].tobytes()
             
             # # cv2.imwrite(os.path.join("./supervision","temp.jpg"),image) 
-            if a.get("skeletons"):
+            if result.get("skeletons"):
                 # print(a)
                     
-                for b in a.get("skeletons"):
+                for b in result.get("skeletons"):
                     landmark=b.get("landmark")
                     left=b.get("body_rectangle").get("left")
                     top=b.get("body_rectangle").get("top")
@@ -170,9 +170,9 @@ class Checkingfalldetection():
             # determine facial expression
 
             
-            if a.get("skeletons"):
+            if result.get("skeletons"):
                 
-                for b in a.get("skeletons"):
+                for b in result.get("skeletons"):
                         landmark=b.get("landmark")
                         width=b.get("body_rectangle").get("width")
                         height=b.get("body_rectangle").get("height")
